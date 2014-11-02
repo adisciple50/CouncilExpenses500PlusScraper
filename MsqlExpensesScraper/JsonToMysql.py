@@ -33,7 +33,7 @@ class ExpensesTable:
 
     def getJson(self):
         conn = urllib3.connection_from_url('http://data.bathhacked.org')
-        response = conn.request('GET','/resource/cimd-yfzu.json?$limit=10000')
+        response = conn.request('GET','/resource/cimd-yfzu.json?$limit=10000&$order=date%20Desc')
         print('\n Dataset Fetched')
         return response.data.decode('utf-8')
 
@@ -60,16 +60,19 @@ class ExpensesTable:
             Row = (JsonRow["body_name"] if "body_name" in JsonRow else 'Empty',JsonRow["transaction_number"] if "transaction_number" in JsonRow else 'Empty',JsonRow["account_code_description"] if "account_code_description" in JsonRow else 'Empty',JsonRow["expenses_type"] if "expenses_type" in JsonRow else 'Empty',JsonRow["service_code"] if "service_code" in JsonRow else 'Empty',JsonRow["service_area_categorisation"] if "service_area_categorisation" in JsonRow else 'Empty',JsonRow["supplier_name"] if "supplier_name" in JsonRow else 'Empty',self.dateFormatter(JsonRow["date"]) if "date" in JsonRow else 'Empty',JsonRow["amount"] if "amount" in JsonRow else 'Empty')
             DataList.append(Row)
         print(InsertStatement)
-        print(DataList)
+        # print(DataList)
         print('\n total items stored:')
         print(str(len(DataList)))
         dbcurse.executemany(InsertStatement, DataList) # REQUIRES A COMMIT STATEMENT FROM THE CONNECTION CLASS!!! - sanity restored.
         db.commit()
         print('done')
+        dbcurse.close()
+        """
         if dbcurse:
             dbcurse.close()
         else:
             print("dbcurse is missing in insertDataIntoTable()")
+        """
         return True
 
     def emptyTable(self):
@@ -85,4 +88,5 @@ class ExpensesTable:
 
 ExpTable1 = ExpensesTable()
 
-ExpTable1.refreshTable()
+#ExpTable1.refreshTable()
+ExpTable1.insertDataIntoTable()
